@@ -22,8 +22,8 @@ func main() {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*", "http://localhost", "*vk*"}
-	config.AllowHeaders = []string{"secret", "Content-Type"}
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"secret", "Content-Type", "Access-Control-Allow-Origin"}
 
 	router.Use(cors.New(config))
 
