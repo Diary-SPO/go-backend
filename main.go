@@ -71,7 +71,8 @@ func handleRequest(c *gin.Context) {
 		return
 	}
 
-	//c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	if _, exists := banList[clientIP]; exists {
 		c.String(http.StatusTooManyRequests, "You are temporarily banned")
