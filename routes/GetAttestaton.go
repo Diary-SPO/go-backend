@@ -3,14 +3,16 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-func GetOrganization(c *gin.Context) {
+func GetAttestation(c *gin.Context) {
+	id := c.Param("id")
 	secret := c.GetHeader("secret")
 
-	apiURL := "https://poo.tomedu.ru/services/people/organization"
+	apiURL := fmt.Sprintf("https://poo.tomedu.ru/services/reports/curator/group-attestation-for-student/%s", id)
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
@@ -35,6 +37,7 @@ func GetOrganization(c *gin.Context) {
 		return
 	}
 
+	// Используйте интерфейс для хранения данных без явной типизации
 	var data interface{}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
@@ -45,6 +48,7 @@ func GetOrganization(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-func AddOrganizationRoute(router *gin.RouterGroup) {
-	router.GET("/organization", GetOrganization)
+func AddGroupAttestationRoute(router *gin.RouterGroup) {
+	attestationRouter := router.Group("/attestation")
+	attestationRouter.GET("/:id", GetAttestation)
 }

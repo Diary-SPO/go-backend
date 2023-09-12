@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/juju/ratelimit"
 	"github.com/scffs/go-backend/middleware"
@@ -19,6 +20,13 @@ var (
 
 func main() {
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"secret", "Content-Type"}
+
+	router.Use(cors.New(config))
+
 	router.GET("/", handleRequest)
 
 	performanceGroup := router.Group("/")
@@ -29,6 +37,22 @@ func main() {
 	organizationGroup := router.Group("/")
 	organizationGroup.Use(middleware.CheckCookie())
 	routes.AddOrganizationRoute(organizationGroup)
+
+	adsGroup := router.Group("/")
+	adsGroup.Use(middleware.CheckCookie())
+	routes.AddNotificationsRoute(adsGroup)
+
+	attestationGroup := router.Group("/")
+	attestationGroup.Use(middleware.CheckID())
+	attestationGroup.Use(middleware.CheckCookie())
+	routes.AddGroupAttestationRoute(attestationGroup)
+
+	lessonsGroup := router.Group("/")
+	lessonsGroup.Use(middleware.CheckCookie())
+	routes.AddStudentLessonsRoute(lessonsGroup)
+
+	loginGroup := router.Group("/")
+	routes.AddLoginRoute(loginGroup)
 
 	server := &http.Server{
 		Addr:    ":3000",

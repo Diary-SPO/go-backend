@@ -7,10 +7,10 @@ import (
 	"net/http"
 )
 
-func GetOrganization(c *gin.Context) {
+func GetNotifications(c *gin.Context) {
 	secret := c.GetHeader("secret")
 
-	apiURL := "https://poo.tomedu.ru/services/people/organization"
+	apiURL := "https://poo.tomedu.ru/services/people/organization/news/last/10"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
@@ -45,6 +45,6 @@ func GetOrganization(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-func AddOrganizationRoute(router *gin.RouterGroup) {
-	router.GET("/organization", GetOrganization)
+func AddNotificationsRoute(router *gin.RouterGroup) {
+	router.GET("/ads", GetNotifications)
 }

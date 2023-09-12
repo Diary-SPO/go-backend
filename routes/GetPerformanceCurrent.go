@@ -36,7 +36,7 @@ func GetPerformanceCurrent(c *gin.Context) {
 		return
 	}
 
-	var data = ""
+	var data interface{}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode response"})
@@ -47,6 +47,6 @@ func GetPerformanceCurrent(c *gin.Context) {
 }
 
 func AddPerformanceRoutes(router *gin.RouterGroup) {
-	performanceRouter := router.Group("/performance")
+	performanceRouter := router.Group("/performance.current")
 	performanceRouter.GET("/:id", GetPerformanceCurrent)
 }
