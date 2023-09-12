@@ -37,7 +37,6 @@ func GetAttestation(c *gin.Context) {
 		return
 	}
 
-	// Используйте интерфейс для хранения данных без явной типизации
 	var data interface{}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {

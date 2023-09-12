@@ -56,13 +56,11 @@ func GetStudentLessons(c *gin.Context) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		// Получение текста ошибки от внешнего сервера
 		errorMessage := fmt.Sprintf("External API returned an error: %s", resp.Status)
 		c.JSON(resp.StatusCode, gin.H{"error": errorMessage})
 		return
 	}
 
-	// Используйте интерфейс для хранения данных без явной типизации
 	var data interface{}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {

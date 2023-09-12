@@ -29,7 +29,6 @@ func GetNotifications(c *gin.Context) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		// Получение текста ошибки от внешнего сервера
 		errorMessage := fmt.Sprintf("External API returned an error: %s", resp.Status)
 		c.JSON(resp.StatusCode, gin.H{"error": errorMessage})
 		return
