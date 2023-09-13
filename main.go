@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+
 	"time"
 )
 
@@ -24,8 +25,12 @@ func main() {
 		return c.SendString("Hello")
 	})
 
-	//loginGroup := app.Group("/login", middleware.CheckCookie())
 	routes.AddLoginRoute(app)
+	routes.AddAttestationRoute(app)
+	routes.AddPerformanceRoute(app)
+	routes.AddOrganizationRoute(app)
+	routes.AddNotificationsRoute(app)
+	routes.AddStudentLessonsRoute(app)
 
 	err := app.Listen(":3000")
 	if err != nil {
