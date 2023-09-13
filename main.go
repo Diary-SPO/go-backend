@@ -24,7 +24,7 @@ func main() {
 	app.Use(cors.New())
 
 	app.Use(limiter.New(limiter.Config{
-		Max:        70,
+		Max:        40,
 		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
@@ -36,7 +36,6 @@ func main() {
 		},
 	}))
 
-	// Middleware для проверки блокировки клиентов.
 	app.Use(func(c *fiber.Ctx) error {
 		ip := c.IP()
 		if _, ok := blockedIPs[ip]; ok {
