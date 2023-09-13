@@ -1,20 +1,18 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
 
-func CheckID() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Param("id")
+func CheckID() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
 
 		if id == "" {
-			c.JSON(http.StatusBadRequest, "Something is bad #2")
-			c.Abort()
-			return
+			return c.Status(http.StatusBadRequest).JSON("Something is bad #2")
 		}
 
-		c.Next()
+		return c.Next()
 	}
 }

@@ -1,20 +1,18 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
 
-func CheckCookie() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		secret := c.GetHeader("secret")
+func CheckCookie() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		secret := c.Get("secret")
 
 		if secret == "" {
-			c.JSON(http.StatusBadRequest, "Something is bad #1")
-			c.Abort()
-			return
+			return c.Status(http.StatusBadRequest).JSON("Something is bad #1")
 		}
 
-		c.Next()
+		return c.Next()
 	}
 }
