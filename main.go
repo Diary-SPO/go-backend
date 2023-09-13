@@ -1,96 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/juju/ratelimit"
-	"github.com/scffs/go-backend/middleware"
-	"github.com/scffs/go-backend/routes"
-	"net"
-	"net/http"
-	"time"
-)
-
-var (
-	limiter     = ratelimit.NewBucket(time.Minute, 80)
-	banList     = make(map[string]time.Time)
-	banDuration = 15 * time.Minute
+	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/middleware/cors"
 )
 
 func main() {
-	router := gin.Default()
+	// Создаем новый экземпляр Fiber
+	app := fiber.New()
 
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	config.AllowHeaders = []string{"secret", "Content-Type", "Access-Control-Allow-Origin"}
+	// Разрешаем CORS (Cross-Origin Resource Sharing)
+	app.Use(cors.New())
 
-	router.Use(cors.New(config))
+	// Создаем роут "hello"
+	app.Post("/hello", func(c *fiber.Ctx) error {
+		return c.SendString("Hello")
+	})
 
-	router.GET("/", handleRequest)
-
-	performanceGroup := router.Group("/")
-	performanceGroup.Use(middleware.CheckID())
-	performanceGroup.Use(middleware.CheckCookie())
-	routes.AddPerformanceRoutes(performanceGroup)
-
-	organizationGroup := router.Group("/")
-	organizationGroup.Use(middleware.CheckCookie())
-	routes.AddOrganizationRoute(organizationGroup)
-
-	adsGroup := router.Group("/")
-	adsGroup.Use(middleware.CheckCookie())
-	routes.AddNotificationsRoute(adsGroup)
-
-	attestationGroup := router.Group("/")
-	attestationGroup.Use(middleware.CheckID())
-	attestationGroup.Use(middleware.CheckCookie())
-	routes.AddGroupAttestationRoute(attestationGroup)
-
-	lessonsGroup := router.Group("/")
-	lessonsGroup.Use(middleware.CheckCookie())
-	routes.AddStudentLessonsRoute(lessonsGroup)
-
-	loginGroup := router.Group("/")
-	routes.AddLoginRoute(loginGroup)
-
-	server := &http.Server{
-		Addr:    ":3000",
-		Handler: router,
-	}
-
-	if err := server.ListenAndServe(); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func handleRequest(c *gin.Context) {
-	clientIP, _, err := net.SplitHostPort(c.Request.RemoteAddr)
+	// Запускаем сервер на порту 3000
+	err := app.Listen(":3000")
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
-	}
-
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-
-	if c.Request.Method == "OPTIONS" {
-		c.Status(http.StatusNoContent)
-		return
-	}
-
-	if _, exists := banList[clientIP]; exists {
-		c.String(http.StatusTooManyRequests, "You are temporarily banned")
-		return
-	}
-
-	if limiter.TakeAvailable(1) > 0 {
-		c.String(http.StatusOK, "Request successful")
-	} else {
-		banList[clientIP] = time.Now()
-		c.String(http.StatusTooManyRequests, "Request limit exceeded. You are temporarily banned")
+		panic(err)
 	}
 }
