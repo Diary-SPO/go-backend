@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var blockedIPs = make(map[string]time.Time)
+
 func main() {
 	app := fiber.New()
 
@@ -22,15 +24,30 @@ func main() {
 	app.Use(cors.New())
 
 	app.Use(limiter.New(limiter.Config{
-		Max:        10,
-		Expiration: 300 * time.Second,
+		Max:        70,
+		Expiration: 1 * time.Minute,
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
 		},
 		LimitReached: func(c *fiber.Ctx) error {
+			ip := c.IP()
+			blockedIPs[ip] = time.Now().Add(5 * time.Minute)
 			return c.Status(fiber.StatusTooManyRequests).SendString("Rate limit exceeded.")
 		},
 	}))
+
+	// Middleware для проверки блокировки клиентов.
+	app.Use(func(c *fiber.Ctx) error {
+		ip := c.IP()
+		if _, ok := blockedIPs[ip]; ok {
+			if time.Now().After(blockedIPs[ip]) {
+				delete(blockedIPs, ip)
+			} else {
+				return c.Status(fiber.StatusTooManyRequests).SendString("You are temporarily blocked.")
+			}
+		}
+		return c.Next()
+	})
 
 	app.Post("/hello", func(c *fiber.Ctx) error {
 		return c.SendString("Hello")
